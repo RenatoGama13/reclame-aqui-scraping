@@ -2,8 +2,8 @@
 
 To scrape the Reclame Aqui page I'm using:
 - python 3.6.3
-- beautifulsoup4 4.8.1 (Use pip for installing)
-- pandas 0.25.1 (Use pip for installing)
+- beautifulsoup4 4.8.1 (Use pip to install)
+- pandas 0.25.1 (Use pip to install)
 - geckodriver (Get from this repository https://github.com/mozilla/geckodriver/releases)
 
 # What to do before running the code:
