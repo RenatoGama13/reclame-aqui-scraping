@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import time
+from time import sleep
 import re
 import pandas as pd
 import numpy
@@ -55,6 +56,8 @@ def is_there_next_page(url):
             return False
 
 def get_complaints_links():
+    WebDriverWait(fire_fox, 10).until(
+        EC.element_to_be_clickable((By.CLASS_NAME, "complain-list")))
     print(f'Geting all hrefs from={fire_fox.current_url}')
     html = BeautifulSoup(fire_fox.page_source, 'html.parser')
     for li_tag in html.find('ul', {'class':'complain-list'}).find_all('li',{'class':'ng-scope'}):
@@ -107,13 +110,26 @@ def add_the_complaint(bs_page):
     dados_df['time'].append(bs_page.find('ul', {'class':'local-date'}).findAll('li', {'class':'ng-binding'})[1].text.strip().split(sep=' às ')[1])
     add_general_data(bs_page)  
 
-def save_data_in_df():
-    for page_link in page_links:
-        print(f'Saving data from=\'{page_link}\'')
-        fire_fox.get(page_link)
+def save_data():
+    for url in page_links:
+        save_data_from_each_page(url)
+        
+        
+def save_data_from_each_page(url, numero_tentativas=2):
+    try:
+        print(f'Saving data from=\'{url}\'')
+        fire_fox.get(url)
         bs_page = BeautifulSoup(fire_fox.page_source, 'html.parser')
         add_the_complaint(bs_page)
         add_replies_to_data_frame(bs_page)
+    except Exception as e:
+        print(f'Error saving data from:{url}', e)
+        if numero_tentativas > 0:
+            sleep(5)
+            save_data_from_each_page(url, numero_tentativas - 1) 
+        else:
+            return None
+        
 
 
 print('Scraping the page')
@@ -141,11 +157,11 @@ dados_df = {
 
 print('Saving the complaints data in the data frame')
 start_time = time.time()
-save_data_in_df()
+save_data()
 elapsed_time = time.time() - start_time
 print(f'Data saved in the data frame- elapsedTime=\'{elapsed_time}\'')
 
-data_frame = pd.DataFrame(dados_df, index=False)
+data_frame = pd.DataFrame(dados_df)
 
 data_frame.to_csv(dest_path, sep=';')
 
