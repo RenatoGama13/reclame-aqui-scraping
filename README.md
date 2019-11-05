@@ -1,15 +1,15 @@
 # reclame-aqui-scraping
 
-To scrape the Reclame Aqui page I'm using:
-- python 3.6.3
-- beautifulsoup4 4.8.1 (Use pip to install)
-- pandas 0.25.1 (Use pip to install)
-- geckodriver (Get from this repository https://github.com/mozilla/geckodriver/releases)
+Para fazer o scraping do site estou usando:
+- python 3.6.3;
+- beautifulsoup4 4.8.1 (Use o pip para instalar);
+- pandas 0.25.1 (Use o pip para instalar);
+- geckodriver (Pode ser obtido no repositório https://github.com/mozilla/geckodriver/releases).
 
-# What to do before running the code:
-- Search for company you want to get the complaints in https://www.reclameaqui.com.br/
-- Copy the company identifier name between the last two bars.
-It will look like this https://www.reclameaqui.com.br/empresa/COMPANY-IDENTIFIER-NAME/
-- Paste the result in the variable "company".
-- A .CSV file will be saved in C:\Workspace. But you can change the path in variable "dest_path".
-- Run and enjoy =)
+# O que fazer antes de rodar o código:
+- Procure pela empresa que você quer obter as reclamações aqui https://www.reclameaqui.com.br/;
+- Copie o identificador da empresa entre as últimas duas barras;
+Será algo parecido com: https://www.reclameaqui.com.br/empresa/COMPANY-IDENTIFIER/;
+- Copie o resultado na variável "company";
+- Um arquivo Complaints.csv será salvo em C:\Workspace. Mas você pode trocar o caminho na variável "dest_path";
+- Rode o código e aproveite =)
