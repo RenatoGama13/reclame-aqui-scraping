@@ -4,7 +4,7 @@ from reclame_aqui_navegacao import ReclameAqui
 
 company = 'COMPANY-IDENTIFIER'
 dest_path = 'DESTINATION-PATH'
-headless = False
+headless = True
 
 navigation = ReclameAqui(company, headless)
 
