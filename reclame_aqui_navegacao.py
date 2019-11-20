@@ -4,24 +4,37 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-import time
 import re
-import pandas as pd
 from time import sleep
 from dados import Dados
 
 class ReclameAqui:
-    def __init__(self, company):
+    def __init__(self, company, headless):
+        self.company = company
         self.base_url = "https://www.reclameaqui.com.br"
         self.url_site = f'{self.base_url}/empresa/{company}/lista-reclamacoes/?pagina='
         self.complaint_url = f'{self.base_url}/{company}'
         self.complaints_links = []
-        self.page_number = 77
-        self.first_page = 77
+        self.page_number = 0
+        self.first_page = 1
         self.is_the_first_page = True
         self.options = Options()
-        self.options.headless = False
+        self.options.headless = headless
         self.fire_fox = webdriver.Firefox(options=self.options)
+        self.dados_df = {
+            'tipo':[],
+            'titulo':[],
+            'texto':[],
+            'local':[],
+            'id':[],
+            'data':[],
+            'hora':[],
+            'empresa':[],
+            'url':[],
+            'status':[],
+            'nota':[],
+            'faria_acordo_novamente':[]
+        }
 
     def go_to_the_next_page(self):
         element = WebDriverWait(self.fire_fox, 15).until(
@@ -60,17 +73,6 @@ class ReclameAqui:
         for li_tag in html.find('ul', {'class':'complain-list'}).find_all('li',{'class':'ng-scope'}):
             self.complaints_links.append(li_tag.find('a').get('href'))
 
-    # def scrape_the_page(self):
-    #     while True:
-    #         if self.is_the_first_page:
-    #             go_to_the_first_page()
-    #         else:
-    #             if is_there_next_page(fire_fox.current_url):
-    #                 go_to_the_next_page()
-    #                 get_complaints_links()
-    #             else:
-    #                 break
-
     def add_general_data(self, bs_page, dados):
         dados.id = re.sub("[^0-9]", "", bs_page.find('ul', {'class':'local-date'}).find('li', {'class':'ng-scope'}).text)
         dados.local = bs_page.find('ul', {'class':'local-date'}).findAll('li', {'class':'ng-binding'})[0].text.strip()
@@ -80,7 +82,7 @@ class ReclameAqui:
         if bs_page.find('div', {'class':'col-md-9'}).findAll('div', {'class':['user-upshot-green', 'user-upshot-purple']}):
             dados.faria_acordo_novamente = bs_page.find('div', {'class':['green-circle img-circle ng-scope', 'red-circle img-circle ng-scope']}).text
             dados.nota = int(bs_page.findAll('div', {'class':'col-sm-12 col-sm-pull-0 col-xs-5 col-xs-pull-7'})[-1].text.strip())
-        save_dados_in_dictionary(dados)
+        self.save_dados_in_dictionary(dados)
 
     def add_replies_to_data_frame  (self, bs_page, dados):
         class_of_considerations = ['user-upshot-green', 'user-upshot-purple']
@@ -95,7 +97,7 @@ class ReclameAqui:
                 dados.tipo = 'Consideração'
             else:
                 dados.tipo = 'Replica'
-            add_general_data(bs_page, dados)
+            self.add_general_data(bs_page, dados)
 
     def add_the_complaint(self, bs_page, dados):
         dados.tipo = 'Reclamação'
@@ -108,7 +110,7 @@ class ReclameAqui:
     def save_data(self, urls):
         for url in urls:
             self.save_data_from_each_page(url)
-        return self.dados
+        return self.dados_df
 
     def save_dados_in_dictionary(self, dados):
         self.dados_df['tipo'].append(dados.tipo)
